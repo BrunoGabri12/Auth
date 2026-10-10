@@ -1,6 +1,9 @@
 package we.rap.backend.config;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +19,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import jakarta.servlet.DispatcherType;
 import we.rap.backend.enums.Roles;
@@ -28,6 +34,9 @@ public class SecurityConfig {
     @Autowired 
     AuthService authService;
 
+    @Value("${api.security.cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
     @Bean 
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
@@ -38,7 +47,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/user/all").hasRole("ADMIN")
             .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/revoke_user_session/**", "/auth/revoke_all_sessions").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole("ADMIN")
             .anyRequest().authenticated()
         )
@@ -47,6 +56,18 @@ public class SecurityConfig {
         )
         .addFilterBefore(new SecurityFilter(authService), UsernamePasswordAuthenticationFilter.class)
         .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(allowedOrigins);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean

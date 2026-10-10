@@ -1,0 +1,25 @@
+<h1>Home</h1>
+
+@if (user(); as user) {
+  <p>Olá, {{ user.username }}!</p>
+
+  <dl>
+    <dt>E-mail</dt>
+    <dd>{{ user.email }}</dd>
+
+    <dt>E-mail verificado</dt>
+    <dd>{{ user.emailVerified ? 'Sim' : 'Não' }}</dd>
+
+    <dt>Perfil</dt>
+    <dd>{{ user.role }}</dd>
+
+    <dt>Membro desde</dt>
+    <dd>{{ user.createdAt | date: 'dd/MM/yyyy' }}</dd>
+  </dl>
+} @else if (errorMessage(); as message) {
+  <p role="alert">{{ message }}</p>
+} @else {
+  <p>Carregando...</p>
+}
+
+<button type="button" (click)="logout()">Sair</button>

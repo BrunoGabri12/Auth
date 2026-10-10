@@ -48,6 +48,7 @@ public class UserController {
         return "Pong";
     }
 
+    @GetMapping("me")
     public UserResponseDto userDetails(@AuthenticationPrincipal User user){
         return userService.getUser(user.getId());
     }

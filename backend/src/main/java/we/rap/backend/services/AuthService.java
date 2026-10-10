@@ -3,6 +3,7 @@ package we.rap.backend.services;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -120,7 +121,7 @@ public class AuthService {
         return new AuthResponseDto(
             accessToken,
             refreshToken,
-            toLocalDateTime(tokenService.getExpiration(accessToken))
+            secondsUntil(tokenService.getExpiration(accessToken))
         );
     }
 
@@ -156,6 +157,10 @@ public class AuthService {
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 not available", exception);
         }
+    }
+
+    private long secondsUntil(Instant instant) {
+        return Math.max(0, Duration.between(Instant.now(), instant).getSeconds());
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {

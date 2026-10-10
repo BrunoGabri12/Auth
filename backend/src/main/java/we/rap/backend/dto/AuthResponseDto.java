@@ -1,9 +1,8 @@
 package we.rap.backend.dto;
 
-import java.time.LocalDateTime;
-
 public record AuthResponseDto(
         String accessToken,
         String refreshToken,
-        LocalDateTime expiresAt
+        // Segundos restantes até a expiração do access token
+        long expiresIn
 ) { }
