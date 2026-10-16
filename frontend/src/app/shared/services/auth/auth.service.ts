@@ -18,11 +18,17 @@ export class AuthService {
 
   private readonly baseUrl = `${environment.apiUrl}/auth`;
 
-  // Refresh em andamento, compartilhado entre chamadas concorrentes
   private refreshInProgress$?: Observable<Token>;
 
   login(userCredentials: UserCredentials):Observable<Token> {
     return this.http.post<Token>(`${this.baseUrl}/login`, userCredentials)
+      .pipe(
+        tap((tokens) => this.saveTokensAndStartSchedule(tokens))
+      )
+  }
+
+  loginWithGoogle(idToken:string):Observable<Token> {
+    return this.http.post<Token>(`${this.baseUrl}/login/google`, {idToken})
       .pipe(
         tap((tokens) => this.saveTokensAndStartSchedule(tokens))
       )

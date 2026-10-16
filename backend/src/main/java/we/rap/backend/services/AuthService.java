@@ -1,6 +1,8 @@
 package we.rap.backend.services;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -14,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 import we.rap.backend.dto.AccessTokenClaims;
 import we.rap.backend.dto.AuthRequestDto;
@@ -30,6 +36,8 @@ import we.rap.backend.repositories.UserRepository;
 @Service
 public class AuthService {
 
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
+
     @Autowired
     UserRepository userRepository;
 
@@ -42,11 +50,15 @@ public class AuthService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    AuthService(GoogleIdTokenVerifier googleIdTokenVerifier) {
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
+    }
+
     @Transactional
     public AuthResponseDto login(AuthRequestDto request) {
         String email = request.email().trim().toLowerCase();
 
-        User user = userRepository.findByEmail(email) //TODO: O repository deve ser exposto somente pela camada de service
+        User user = userRepository.findByEmail(email)
                 .filter(u -> u.isActive())
                 .filter(u -> u.getPasswordHash() != null
                         && passwordEncoder.matches(request.password(), u.getPasswordHash()))
@@ -57,7 +69,70 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    // noRollbackFor: a revogação feita ao detectar reuso precisa ser persistida mesmo com a exceção
+    @Transactional
+    public AuthResponseDto loginWithGoogle(String idTokenString) {
+        Payload payload = verifyGoogleIdToken(idTokenString);
+
+        String googleId = payload.getSubject();
+        String email = payload.getEmail();
+        boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+
+        User user = userRepository.findByGoogleId(googleId)
+                .orElseGet(() -> linkOrCreateGoogleUser(googleId, email, emailVerified, payload));
+
+        if (!user.isActive()) {
+            throw new InvalidCredentialsException();
+        }
+
+        user.setLastLoginAt(LocalDateTime.now());
+
+        return issueTokens(user);
+    }
+
+    private Payload verifyGoogleIdToken(String idTokenString) {
+        try {
+            GoogleIdToken idToken = googleIdTokenVerifier.verify(idTokenString);
+            if (idToken == null) {
+                throw new InvalidCredentialsException();
+            }
+            return idToken.getPayload();
+        } catch (GeneralSecurityException | IOException | IllegalArgumentException exception) {
+            throw new InvalidCredentialsException();
+        }
+    }
+
+    private User linkOrCreateGoogleUser(String googleId, String email, boolean emailVerified, Payload payload) {
+        if (email == null || !emailVerified) {
+            throw new InvalidCredentialsException();
+        }
+
+        return userRepository.findByEmail(email)
+                .map(existing -> {
+                    if (existing.getGoogleId() != null && !existing.getGoogleId().equals(googleId)) {
+                        throw new InvalidCredentialsException();
+                    }
+                    existing.setGoogleId(googleId);
+                    existing.setEmailVerified(true);
+                    return existing;
+                })
+                .orElseGet(() -> userRepository.save(User.builder()
+                        .email(email)
+                        .username(resolveUsername(payload, email))
+                        .googleId(googleId)
+                        .emailVerified(true)
+                        .isActive(true)
+                        .role(Roles.USER)
+                        .build()));
+    }
+
+    private String resolveUsername(Payload payload, String email) {
+        Object name = payload.get("name");
+        if (name instanceof String value && !value.isBlank()) {
+            return value;
+        }
+        return email.substring(0, email.indexOf('@'));
+    }
+
     @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
     public AuthResponseDto refresh(String refreshToken) {
         Auth session = findSession(refreshToken);
@@ -119,10 +194,9 @@ public class AuthService {
         String accessToken = tokenService.generateAccessToken(user, session.getId());
 
         return new AuthResponseDto(
-            accessToken,
-            refreshToken,
-            secondsUntil(tokenService.getExpiration(accessToken))
-        );
+                accessToken,
+                refreshToken,
+                secondsUntil(tokenService.getExpiration(accessToken)));
     }
 
     private Auth findValidSession(String refreshToken) {

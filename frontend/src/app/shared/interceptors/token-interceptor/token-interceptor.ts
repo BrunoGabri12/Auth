@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth/auth.service';
 
 const PUBLIC_ROUTES: { method: string; path: string }[] = [
   { method: 'POST', path: '/auth/login' },
+  { method: 'POST', path: '/auth/login/google' },
   { method: 'POST', path: '/user/register' },
 ];
 

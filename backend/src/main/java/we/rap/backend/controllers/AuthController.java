@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import we.rap.backend.dto.AuthRequestDto;
 import we.rap.backend.dto.AuthResponseDto;
+import we.rap.backend.dto.GoogleLoginRequestDto;
 import we.rap.backend.dto.RefreshRequestDto;
 import we.rap.backend.services.AuthService;
 
@@ -32,6 +33,11 @@ public class AuthController {
     public ResponseEntity<Void> logout(@RequestBody @Valid RefreshRequestDto request) {
         authService.logout(request.refreshToken());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("login/google")
+    public AuthResponseDto loginWithGoogle(@RequestBody @Valid GoogleLoginRequestDto request) {
+        return authService.loginWithGoogle(request.idToken());
     }
 
     @PostMapping("refresh")
