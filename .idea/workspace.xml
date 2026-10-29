@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="ee978667-cb1a-426d-a26d-948799e73b14" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/WeRap.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/.obsidian/app.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/.obsidian/appearance.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/.obsidian/core-plugins.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/.obsidian/workspace.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/Discovery/Forgot password.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/Discovery/Servidor SMTP.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/Discovery/Validação de e-mail.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WeRapTasks/Revisões e aprendizados computação/STEPS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/dto/ForgotPassword.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/enums/TokenType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/models/UserTokens.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/repositories/TokenUserServiceRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/services/MailService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/services/TokenUserService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V5__email_tokens.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/controllers/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/services/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/we/rap/backend/services/AuthService.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="3KntcMNYVO8fxqdONSOnnVBvRlN" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/bruno-santos/Desktop/WeRap/WeRap/frontend/node_modules/typescript/lib&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ee978667-cb1a-426d-a26d-948799e73b14" name="Changes" comment="" />
+      <created>1792205243837</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1792205243837</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

@@ -5,6 +5,9 @@ import { environment } from '../../../../environments/environment';
 import { UserCredentials } from './dto/user-credentials.dto';
 import { StorageService } from '../storage/storage.service';
 import { Token } from './dto/token.dto';
+import { ForgotPassword } from './dto/forgot-password.dto';
+import { NewPassword } from './dto/new-password.dto';
+import { ValidateToken } from './dto/validate-token.dto';
 import { RefreshScheduleService } from '../refresh-schedule/refresh-schedule.service';
 
 const STORAGE_REFRESH = 'werap.auth.refresh'
@@ -48,6 +51,18 @@ export class AuthService {
       );
 
     return this.refreshInProgress$;
+  }
+
+  forgotPassword(request: ForgotPassword): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/forgot_password`, request);
+  }
+
+  resetPassword(request: NewPassword): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/reset_password`, request);
+  }
+
+  validateUser(request: ValidateToken): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/validate_user`, request);
   }
 
   getAccessToken(): string | null {

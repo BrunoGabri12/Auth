@@ -16,8 +16,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -49,6 +47,9 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/user/all").hasRole("ADMIN")
             .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/login/google").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/forgot_password", "/auth/reset_password", "/auth/validate_user").permitAll()
+            // Autenticados pelo refresh token do body: o access token já pode ter expirado
+            .requestMatchers(HttpMethod.POST, "/auth/refresh", "/auth/logout").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/revoke_user_session/**", "/auth/revoke_all_sessions").hasRole("ADMIN")
             .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole("ADMIN")
@@ -86,7 +87,4 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Bean JwtDecoder jwtDecoder() {
-        return JwtDecoders.fromIssuerLocation("https://accounts.google.com");
-    }
 }

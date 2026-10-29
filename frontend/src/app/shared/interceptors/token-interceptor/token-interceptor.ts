@@ -4,9 +4,16 @@ import { catchError, switchMap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../services/auth/auth.service';
 
-const PUBLIC_ROUTES: { method: string; path: string }[] = [
+const PUBLIC_ROUTES: { method: string; path: string; prefix?: boolean }[] = [
   { method: 'POST', path: '/auth/login' },
   { method: 'POST', path: '/auth/login/google' },
+  { method: 'POST', path: '/auth/forgot_password' },
+  { method: 'POST', path: '/auth/reset_password' },
+  { method: 'POST', path: '/auth/validate_user' },
+  // Usam o refresh token do body; se passassem pelo retry de 401, um refresh recusado
+  // chamaria refresh() de novo e ficaria esperando por ele mesmo
+  { method: 'POST', path: '/auth/refresh' },
+  { method: 'POST', path: '/auth/logout' },
   { method: 'POST', path: '/user/register' },
 ];
 
@@ -41,5 +48,9 @@ function withToken(req: HttpRequest<unknown>, token: string | null): HttpRequest
 
 function isPublicAuthRequest(req: HttpRequest<unknown>): boolean {
   const path = req.url.slice(environment.apiUrl.length).split('?')[0].replace(/\/+$/, '');
-  return PUBLIC_ROUTES.some((route) => route.method === req.method && route.path === path);
+  return PUBLIC_ROUTES.some(
+    (route) =>
+      route.method === req.method &&
+      (route.prefix ? path.startsWith(route.path) : route.path === path)
+  );
 }

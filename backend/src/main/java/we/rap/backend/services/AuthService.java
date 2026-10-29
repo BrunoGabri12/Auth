@@ -1,15 +1,11 @@
 package we.rap.backend.services;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HexFormat;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +20,29 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import we.rap.backend.dto.AccessTokenClaims;
 import we.rap.backend.dto.AuthRequestDto;
 import we.rap.backend.dto.AuthResponseDto;
+import we.rap.backend.dto.NewPassword;
+import we.rap.backend.dto.ValidateToken;
 import we.rap.backend.enums.Roles;
+import we.rap.backend.enums.TokenType;
 import we.rap.backend.exceptions.auth.InvalidAccessTokenException;
 import we.rap.backend.exceptions.auth.InvalidCredentialsException;
+import we.rap.backend.exceptions.auth.InvalidEmailValidationException;
 import we.rap.backend.exceptions.auth.InvalidRefreshTokenException;
+import we.rap.backend.exceptions.auth.InvalidResetPasswordException;
+import we.rap.backend.exceptions.auth.InvalidUserTokenException;
+import we.rap.backend.exceptions.user.EmailAlreadyInUseException;
 import we.rap.backend.models.Auth;
 import we.rap.backend.models.User;
+import we.rap.backend.models.UserTokens;
 import we.rap.backend.repositories.AuthRepository;
+import we.rap.backend.repositories.TokenUserServiceRepository;
 import we.rap.backend.repositories.UserRepository;
+import we.rap.backend.shared.utils.HashUtils;
 
 @Service
 public class AuthService {
+
+    private final MailService mailService;
 
     private final GoogleIdTokenVerifier googleIdTokenVerifier;
 
@@ -50,11 +58,16 @@ public class AuthService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    AuthService(GoogleIdTokenVerifier googleIdTokenVerifier) {
+    @Autowired 
+    TokenUserServiceRepository tokenUserServiceRepository;
+
+
+    AuthService(GoogleIdTokenVerifier googleIdTokenVerifier, MailService mailService) {
         this.googleIdTokenVerifier = googleIdTokenVerifier;
+        this.mailService = mailService;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidEmailValidationException.class)
     public AuthResponseDto login(AuthRequestDto request) {
         String email = request.email().trim().toLowerCase();
 
@@ -63,6 +76,11 @@ public class AuthService {
                 .filter(u -> u.getPasswordHash() != null
                         && passwordEncoder.matches(request.password(), u.getPasswordHash()))
                 .orElseThrow(InvalidCredentialsException::new);
+
+        if(!user.isEmailVerified()) {
+            mailService.validateEmail(user);
+            throw new InvalidEmailValidationException();
+        }
 
         user.setLastLoginAt(LocalDateTime.now());
 
@@ -74,11 +92,11 @@ public class AuthService {
         Payload payload = verifyGoogleIdToken(idTokenString);
 
         String googleId = payload.getSubject();
-        String email = payload.getEmail();
+        String email = payload.getEmail() == null ? null : payload.getEmail().toLowerCase().trim();
         boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
 
         User user = userRepository.findByGoogleId(googleId)
-                .orElseGet(() -> linkOrCreateGoogleUser(googleId, email, emailVerified, payload));
+                .orElseGet(() -> createGoogleUser(googleId, email, emailVerified, payload));
 
         if (!user.isActive()) {
             throw new InvalidCredentialsException();
@@ -87,6 +105,19 @@ public class AuthService {
         user.setLastLoginAt(LocalDateTime.now());
 
         return issueTokens(user);
+    }
+
+
+    @Transactional
+    public void validateUserEmail(ValidateToken request) {
+        UserTokens issued = tokenUserServiceRepository.getTokenByHashToken(HashUtils.hash(request.token()))
+                .filter(t -> t.getTokenType() == TokenType.VALIDATE_USER)
+                .filter(t -> !t.isRevoked())
+                .filter(t -> t.getExpiredAt().isAfter(Instant.now()))
+                .orElseThrow(InvalidUserTokenException::new);
+
+        issued.setRevoked(true);
+        issued.getUser().setEmailVerified(true);
     }
 
     private Payload verifyGoogleIdToken(String idTokenString) {
@@ -101,28 +132,23 @@ public class AuthService {
         }
     }
 
-    private User linkOrCreateGoogleUser(String googleId, String email, boolean emailVerified, Payload payload) {
+    private User createGoogleUser(String googleId, String email, boolean emailVerified, Payload payload) {
         if (email == null || !emailVerified) {
             throw new InvalidCredentialsException();
         }
 
-        return userRepository.findByEmail(email)
-                .map(existing -> {
-                    if (existing.getGoogleId() != null && !existing.getGoogleId().equals(googleId)) {
-                        throw new InvalidCredentialsException();
-                    }
-                    existing.setGoogleId(googleId);
-                    existing.setEmailVerified(true);
-                    return existing;
-                })
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .email(email)
-                        .username(resolveUsername(payload, email))
-                        .googleId(googleId)
-                        .emailVerified(true)
-                        .isActive(true)
-                        .role(Roles.USER)
-                        .build()));
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyInUseException(email);
+        }
+
+        return userRepository.save(User.builder()
+                .email(email)
+                .username(resolveUsername(payload, email))
+                .googleId(googleId)
+                .emailVerified(true)
+                .isActive(true)
+                .role(Roles.USER)
+                .build());
     }
 
     private String resolveUsername(Payload payload, String email) {
@@ -165,7 +191,7 @@ public class AuthService {
 
     @Transactional
     public void revokeAllSessions() {
-        authRepository.revokeAllExceptRole();
+        authRepository.revokeAllExceptRole(Roles.ADMIN);
     }
 
     @Transactional(readOnly = true)
@@ -181,12 +207,29 @@ public class AuthService {
                 .orElseThrow(InvalidAccessTokenException::new);
     }
 
+    @Transactional()
+    public void resetPassword(NewPassword request) {
+
+       UserTokens issued = tokenUserServiceRepository.getTokenByHashToken(HashUtils.hash(request.token()))
+            .filter(t -> t.getTokenType() == TokenType.FORGOT_PASSWORD)
+            .filter(t -> !t.isRevoked())
+            .filter(t -> t.getExpiredAt().isAfter(Instant.now()))
+            .filter(t -> t.getUser().isActive())
+            .orElseThrow(InvalidResetPasswordException::new);
+
+    issued.setRevoked(true);
+    User user = issued.getUser();
+    user.setPasswordHash(passwordEncoder.encode(request.password()));
+    revokeAllByUserId(user.getId());
+        
+    }
+
     private AuthResponseDto issueTokens(User user) {
         String refreshToken = tokenService.generateRefreshToken(user);
 
         Auth session = new Auth();
         session.setUser(user);
-        session.setTokenHash(hash(refreshToken));
+        session.setTokenHash(HashUtils.hash(refreshToken));
         session.setExpiresAt(toLocalDateTime(tokenService.getExpiration(refreshToken)));
         authRepository.save(session);
 
@@ -211,7 +254,7 @@ public class AuthService {
     private Auth findSession(String refreshToken) {
         UUID userId = tokenService.validateRefreshToken(refreshToken);
 
-        return authRepository.findByTokenHash(hash(refreshToken))
+        return authRepository.findByTokenHash(HashUtils.hash(refreshToken))
                 .filter(session -> session.getUser().getId().equals(userId))
                 .filter(session -> session.getUser().isActive())
                 .orElseThrow(InvalidRefreshTokenException::new);
@@ -223,15 +266,6 @@ public class AuthService {
         }
     }
 
-    private String hash(String token) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                    .digest(token.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 not available", exception);
-        }
-    }
 
     private long secondsUntil(Instant instant) {
         return Math.max(0, Duration.between(Instant.now(), instant).getSeconds());
