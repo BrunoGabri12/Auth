@@ -2,6 +2,7 @@ package we.rap.backend.services;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import we.rap.backend.dto.UserRequestDto;
 import we.rap.backend.dto.UserResponseDto;
 import we.rap.backend.enums.Roles;
+import we.rap.backend.enums.TokenType;
 import we.rap.backend.exceptions.user.EmailAlreadyInUseException;
 import we.rap.backend.exceptions.user.UserNotFoundException;
 import we.rap.backend.exceptions.user.UserPermissionException;
@@ -20,6 +22,8 @@ import we.rap.backend.repositories.UserRepository;
 
 @Service
 public class UserService {
+
+    private final MailService mailService;
 
     @Autowired
     UserRepository userRepository;
@@ -30,13 +34,35 @@ public class UserService {
     @Autowired
     AuthService authService;
 
+    @Autowired 
+    TokenUserService tokenUserService;
+
+    UserService(MailService mailService) {
+        this.mailService = mailService;
+    }
+
     @Transactional
-    public UserResponseDto createNewUser(UserRequestDto request) {
+    public void createNewUser(UserRequestDto request) {
         String email = request.email().trim().toLowerCase();
 
-        if (userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyInUseException(email);
+        Optional<User> availableUser = userRepository.findByEmail(email);
+
+        if(availableUser.isPresent()) {
+            User existingUser = availableUser.get();
+
+            if (existingUser.getGoogleId() != null) {
+                throw new EmailAlreadyInUseException(email);
+            }
+
+            boolean hasTokensAvailabels = tokenUserService.sentRecently(existingUser, TokenType.VALIDATE_USER);
+
+            if(hasTokensAvailabels) return;
+
+            mailService.validateEmail(existingUser);
+
+            return;
         }
+
 
         User user = User.builder()
                 .email(email)
@@ -51,8 +77,9 @@ public class UserService {
 
         User saved = userRepository.save(user);
 
-        return toResponseDto(saved);
+        mailService.validateEmail(saved);
     }
+
 
     @Transactional(readOnly = true)
     public List<UserResponseDto> findAllUsers() {

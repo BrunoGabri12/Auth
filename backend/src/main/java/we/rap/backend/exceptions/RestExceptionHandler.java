@@ -15,7 +15,11 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import we.rap.backend.exceptions.auth.InvalidCredentialsException;
+import we.rap.backend.exceptions.auth.InvalidEmailValidationException;
 import we.rap.backend.exceptions.auth.InvalidRefreshTokenException;
+import we.rap.backend.exceptions.auth.InvalidResetPasswordException;
+import we.rap.backend.exceptions.auth.InvalidUserTokenException;
+import we.rap.backend.exceptions.mail.ErrorToSendException;
 import we.rap.backend.exceptions.user.EmailAlreadyInUseException;
 import we.rap.backend.exceptions.user.UserNotFoundException;
 import we.rap.backend.exceptions.user.UserPermissionException;
@@ -25,22 +29,22 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(EmailAlreadyInUseException.class)
     public ResponseEntity<ApiError> handleEmailInUse(EmailAlreadyInUseException ex) {
-        return  build(HttpStatus.BAD_REQUEST, List.of("Unable to complete registration"));
+        return  build(HttpStatus.BAD_REQUEST, List.of("Não foi possível completar o cadastro"));
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException ex) {
-        return build(HttpStatus.UNAUTHORIZED, List.of("Invalid email or password"));
+        return build(HttpStatus.UNAUTHORIZED, List.of("Senha ou email inválidos"));
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<ApiError> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
-        return build(HttpStatus.UNAUTHORIZED, List.of("Invalid or expired refresh token"));
+        return build(HttpStatus.UNAUTHORIZED, List.of("Refresh token inválido ou expirado"));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
-        return build(HttpStatus.BAD_REQUEST, List.of("Resource conflicts with existing data"));
+        return build(HttpStatus.BAD_REQUEST, List.of("Conflito com dados já existentes"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,27 +60,47 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex) {
-        return build(HttpStatus.BAD_REQUEST, List.of("Malformed request body"));
+        return build(HttpStatus.BAD_REQUEST, List.of("E-mail mal formado"));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFoundUser(UserNotFoundException ex) {
-        return build(HttpStatus.NOT_FOUND, List.of("User not found"));
+        return build(HttpStatus.OK, List.of("Operação inválida"));
     } 
 
-    @ExceptionHandler(UserPermissionException.class)
+    @ExceptionHandler({UserPermissionException.class})
     public ResponseEntity<ApiError> handlePermissionException(UserPermissionException ex){
-        return build(HttpStatus.FORBIDDEN,List.of("User don't have permission"));
+        return build(HttpStatus.FORBIDDEN,List.of("Usuário não tem permissão"));
+    }
+
+    @ExceptionHandler({InvalidResetPasswordException.class}) 
+    public ResponseEntity<ApiError> handlResponseEntity(InvalidResetPasswordException ex) {
+        return build(HttpStatus.FORBIDDEN, List.of("Usuário não tem permissão"));
+    }
+
+    @ExceptionHandler(InvalidUserTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidUserToken(InvalidUserTokenException ex) {
+        return build(HttpStatus.BAD_REQUEST, List.of("Link inválido ou expirado"));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpected(Exception ex) {
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, List.of("An unexpected error occurred"));
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, List.of("Um erro inesperado aconteceu"));
+    }
+
+    @ExceptionHandler(InvalidEmailValidationException.class)
+    public ResponseEntity<ApiError> handleNotValidateUser(Exception ex){
+        return build(HttpStatus.FORBIDDEN, List.of("E-mail não validado. Use o link de validação enviado para o seu e-mail"));
     }
 
     @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class })
     public ResponseEntity<ApiError> handleResouceNotFound(Exception ex){
-        return build(HttpStatus.NOT_FOUND, List.of("Resource not found"));
+        return build(HttpStatus.NOT_FOUND, List.of("Recurso não encontrado"));
+    }
+
+    @ExceptionHandler({ErrorToSendException.class}) 
+    public ResponseEntity<ApiError> handleNotAvailableEmail() {
+        return build(HttpStatus.SERVICE_UNAVAILABLE, List.of("Não foi possível enviar o e-mail. Tente mais tarde"));
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, List<String> errors) {

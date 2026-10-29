@@ -10,8 +10,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.transaction.Transactional;
 import we.rap.backend.enums.Roles;
 import we.rap.backend.models.User;
 import we.rap.backend.repositories.UserRepository;

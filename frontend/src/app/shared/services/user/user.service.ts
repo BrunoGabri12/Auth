@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { User } from './dto/user.dto';
+import { CreateUser } from './dto/create-user.dto';
+import { MessageResponse } from './dto/message-response.dto';
 
 @Service()
 export class UserService {
@@ -12,5 +14,9 @@ export class UserService {
 
   getMe(): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/me`);
+  }
+
+  register(request: CreateUser): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.baseUrl}/register`, request);
   }
 }

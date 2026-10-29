@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import we.rap.backend.dto.AuthRequestDto;
 import we.rap.backend.dto.AuthResponseDto;
+import we.rap.backend.dto.ForgotPassword;
 import we.rap.backend.dto.GoogleLoginRequestDto;
+import we.rap.backend.dto.NewPassword;
 import we.rap.backend.dto.RefreshRequestDto;
+import we.rap.backend.dto.ValidateToken;
 import we.rap.backend.services.AuthService;
+import we.rap.backend.services.MailService;
 
 @RestController
 @RequestMapping("/auth")
@@ -23,6 +27,10 @@ public class AuthController {
 
     @Autowired
     AuthService authService;
+
+    @Autowired
+    MailService mailService; 
+
 
     @PostMapping("login")
     public AuthResponseDto login(@RequestBody @Valid AuthRequestDto login) {
@@ -50,7 +58,27 @@ public class AuthController {
         authService.logoutAll(request.refreshToken());
         return ResponseEntity.noContent().build();
     }
- 
+
+    @PostMapping("forgot_password")
+    public ResponseEntity<Void> forgotPassord(@RequestBody @Valid ForgotPassword request) {
+        mailService.sendForgotPassword(request);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PostMapping("reset_password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid NewPassword request) {
+        authService.resetPassword(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("validate_user")
+    public ResponseEntity<Void> validateUser(@RequestBody @Valid ValidateToken request) {
+        authService.validateUserEmail(request);
+        return ResponseEntity.noContent().build();
+    }
+    
+    
+
     //ADMIN
     @PostMapping("revoke_user_session/{userId}")
     public ResponseEntity<Void> revokeAll(@PathVariable UUID userId) {
@@ -58,7 +86,7 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("revoke_all")
+    @PostMapping("revoke_all_sessions")
     public ResponseEntity<Void> revoke_all() {
         authService.revokeAllSessions();
         return ResponseEntity.noContent().build();
