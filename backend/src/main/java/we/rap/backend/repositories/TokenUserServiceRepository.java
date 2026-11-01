@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,6 +18,14 @@ public interface TokenUserServiceRepository extends JpaRepository<UserTokens, Lo
 
     List<UserTokens> getTokensByUserIdAndTokenTypeAndRevokedFalse(UUID userId, TokenType tokenType);
 
+    @Modifying
+    @Query("""
+        DELETE 
+        FROM UserTokens t 
+        WHERE t.revoked = true 
+            AND t.expiredAt < CURRENT_TIMESTAMP
+        """)
+    int deleteUsedTokens();
 
     @Query("""
         SELECT t
