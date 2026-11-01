@@ -25,4 +25,15 @@ public interface AuthRepository extends JpaRepository<Auth,UUID>{
               AND a.user.id IN (SELECT u.id FROM User u WHERE u.role <> :role)
           """)
     int revokeAllExceptRole(@Param("role") Roles role);
+
+    @Modifying
+    @Query(
+        """
+            DELETE Auth a 
+            WHERE  a.revoked = true 
+                AND expiresAt > CURRENT_TIMESTAMP
+        """
+    )
+    int deleteUsedTokens();
+
 }
