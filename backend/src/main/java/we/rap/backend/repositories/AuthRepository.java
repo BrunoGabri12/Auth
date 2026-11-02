@@ -31,7 +31,7 @@ public interface AuthRepository extends JpaRepository<Auth,UUID>{
         """
             DELETE Auth a 
             WHERE  a.revoked = true 
-                AND expiresAt > CURRENT_TIMESTAMP
+                AND expiresAt < CURRENT_TIMESTAMP
         """
     )
     int deleteUsedTokens();
