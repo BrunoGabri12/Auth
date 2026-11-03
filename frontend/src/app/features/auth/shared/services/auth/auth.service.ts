@@ -1,14 +1,15 @@
 import { inject, Service } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, EMPTY, finalize, Observable, shareReplay, tap, throwError } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { UserCredentials } from './dto/user-credentials.dto';
-import { StorageService } from '../storage/storage.service';
-import { Token } from './dto/token.dto';
+import { environment } from '../../../../../../environments/environment';
+import { RefreshScheduleService } from '../../../../../shared/services/refresh-schedule/refresh-schedule.service';
+import { StorageService } from '../../../../../shared/services/storage/storage.service';
 import { ForgotPassword } from './dto/forgot-password.dto';
 import { NewPassword } from './dto/new-password.dto';
+import { Token } from './dto/token.dto';
+import { UserCredentials } from './dto/user-credentials.dto';
 import { ValidateToken } from './dto/validate-token.dto';
-import { RefreshScheduleService } from '../refresh-schedule/refresh-schedule.service';
+
 
 const STORAGE_REFRESH = 'werap.auth.refresh'
 const STORAGE_ACCESS = 'werap.auth.access'

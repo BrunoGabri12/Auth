@@ -1,14 +1,15 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthService } from '../../../shared/services/auth/auth.service';
+import { AuthService } from '../shared/services/auth/auth.service';
 
 @Component({
   imports: [RouterLink],
-  selector: 'app-validate-user-page',
-  templateUrl: './validate-user-page.html',
+  selector: 'app-validate-user',
+  styleUrl: './validate-user.component.scss',
+  templateUrl: './validate-user.component.html',
 })
-export class ValidateUserPage implements OnInit {
+export class ValidateUserComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   // Token enviado no link do e-mail: /validate_user?token=...

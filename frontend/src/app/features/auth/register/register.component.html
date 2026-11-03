@@ -2,7 +2,7 @@
 
 @if (successMessage(); as message) {
   <p role="status">{{ message }}</p>
-  <a routerLink="/login">Ir para o login</a>
+  <a routerLink="/auth/login">Ir para o login</a>
 } @else {
   <form [formGroup]="form" (ngSubmit)="register()">
     <label>
@@ -53,5 +53,5 @@
     <button type="submit" [disabled]="loading()">Criar conta</button>
   </form>
 
-  <a routerLink="/login">Já tenho uma conta</a>
+  <a routerLink="/auth/login">Já tenho uma conta</a>
 }

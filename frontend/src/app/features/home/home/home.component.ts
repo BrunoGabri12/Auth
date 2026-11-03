@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../shared/services/auth/auth.service';
 import { UserService } from '../../../shared/services/user/user.service';
 import { User } from '../../../shared/services/user/dto/user.dto';
+import { AuthService } from '../../auth/shared/services/auth/auth.service';
 
 @Component({
   imports: [DatePipe],
@@ -28,6 +28,6 @@ export class HomeComponent implements OnInit {
 
   protected logout() {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 }

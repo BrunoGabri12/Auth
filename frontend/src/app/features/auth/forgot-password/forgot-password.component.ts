@@ -1,15 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../../shared/services/auth/auth.service';
+import { AuthService } from '../shared/services/auth/auth.service';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
-  selector: 'app-forgot-password-page',
-  styleUrl: './forgot-password-page.scss',
-  templateUrl: './forgot-password-page.html',
+  selector: 'app-forgot-password',
+  styleUrl: './forgot-password.component.scss',
+  templateUrl: './forgot-password.component.html',
 })
-export class ForgotPasswordPage {
+export class ForgotPasswordComponent {
   private readonly authService = inject(AuthService);
 
   protected readonly form = inject(NonNullableFormBuilder).group({

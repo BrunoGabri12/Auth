@@ -16,11 +16,11 @@ const EMAIL_MAX_LENGTH = 255;
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
-  selector: 'app-register-page',
-  styleUrl: './register-page.scss',
-  templateUrl: './register-page.html',
+  selector: 'app-register',
+  styleUrl: './register.component.scss',
+  templateUrl: './register.component.html',
 })
-export class RegisterPage {
+export class RegisterComponent {
   private readonly userService = inject(UserService);
 
   protected readonly usernameMinLength = USERNAME_MIN_LENGTH;

@@ -3,15 +3,15 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { ValidateUserPage } from './validate-user-page';
+import { ValidateUserComponent } from './validate-user.component';
 
-describe('ValidateUserPage', () => {
-  let fixture: ComponentFixture<ValidateUserPage>;
+describe('ValidateUserComponent', () => {
+  let fixture: ComponentFixture<ValidateUserComponent>;
   let httpTesting: HttpTestingController;
 
   async function setup(token: string | null) {
     await TestBed.configureTestingModule({
-      imports: [ValidateUserPage],
+      imports: [ValidateUserComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -23,7 +23,7 @@ describe('ValidateUserPage', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ValidateUserPage);
+    fixture = TestBed.createComponent(ValidateUserComponent);
     httpTesting = TestBed.inject(HttpTestingController);
     await fixture.whenStable();
   }
@@ -58,6 +58,6 @@ describe('ValidateUserPage', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('a[href="/login"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('a[href="/auth/login"]')).toBeTruthy();
   });
 });

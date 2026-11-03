@@ -2,20 +2,20 @@ import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../../shared/services/auth/auth.service';
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   passwordsMatch,
 } from '../../../shared/validators/password';
+import { AuthService } from '../shared/services/auth/auth.service';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
-  selector: 'app-reset-password-page',
-  styleUrl: './reset-password-page.scss',
-  templateUrl: './reset-password-page.html',
+  selector: 'app-reset-password',
+  styleUrl: './reset-password.component.scss',
+  templateUrl: './reset-password.component.html',
 })
-export class ResetPasswordPage {
+export class ResetPasswordComponent {
   private readonly authService = inject(AuthService);
 
   // Token enviado no link do e-mail: /reset_password?token=...

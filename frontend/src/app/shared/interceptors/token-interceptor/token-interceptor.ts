@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/comm
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from '../../../features/auth/shared/services/auth/auth.service';
 
 const PUBLIC_ROUTES: { method: string; path: string; prefix?: boolean }[] = [
   { method: 'POST', path: '/auth/login' },

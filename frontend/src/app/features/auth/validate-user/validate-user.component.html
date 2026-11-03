@@ -4,14 +4,14 @@
   <p role="status">Validando seu e-mail...</p>
 } @else if (done()) {
   <p role="status">E-mail validado com sucesso. Agora você já pode entrar.</p>
-  <a routerLink="/login">Ir para o login</a>
+  <a routerLink="/auth/login">Ir para o login</a>
 } @else if (invalidLink()) {
   <p role="alert">
     Este link de validação é inválido ou expirou. Entre com seu e-mail e senha para receber um
     novo link.
   </p>
-  <a routerLink="/login">Ir para o login</a>
+  <a routerLink="/auth/login">Ir para o login</a>
 } @else {
   <p role="alert">{{ errorMessage() }}</p>
-  <a routerLink="/login">Voltar para o login</a>
+  <a routerLink="/auth/login">Voltar para o login</a>
 }

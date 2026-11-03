@@ -1,28 +1,32 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
-import { filter, finalize, map } from 'rxjs';
+import { SocialAuthService, GoogleSigninButtonDirective } from '@abacritt/angularx-social-login';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../../shared/services/auth/auth.service';
-import { GoogleSigninButtonDirective, SocialAuthService } from '@abacritt/angularx-social-login';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../shared/services/auth/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { map, filter, finalize } from 'rxjs';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink, GoogleSigninButtonDirective],
-  selector: 'app-login-page',
-  styleUrl: './login-page.scss',
-  templateUrl: './login-page.html',
+  selector: 'app-login',
+  styleUrl: './login.component.scss',
+  templateUrl: './login.component.html',
 })
-export class LoginPage implements OnInit {
+export class LoginComponent {
+  private readonly nnfb = inject(NonNullableFormBuilder)
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly socialAuthService = inject(SocialAuthService);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly form = inject(NonNullableFormBuilder).group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
-  });
+
+  protected readonly form = this.nnfb.group({
+    email: this.nnfb.control<string>('', [Validators.required, Validators.email]),
+    password: this.nnfb.control<string>('', [Validators.required])
+  })
+
+
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);

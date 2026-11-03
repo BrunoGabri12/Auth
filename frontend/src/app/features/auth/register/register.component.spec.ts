@@ -3,19 +3,19 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { RegisterPage } from './register-page';
+import { RegisterComponent } from './register.component';
 
-describe('RegisterPage', () => {
-  let fixture: ComponentFixture<RegisterPage>;
+describe('RegisterComponent', () => {
+  let fixture: ComponentFixture<RegisterComponent>;
   let httpTesting: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RegisterPage],
+      imports: [RegisterComponent],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(RegisterPage);
+    fixture = TestBed.createComponent(RegisterComponent);
     httpTesting = TestBed.inject(HttpTestingController);
     await fixture.whenStable();
   });
